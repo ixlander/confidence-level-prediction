@@ -1,0 +1,15 @@
+services:
+  confidence-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: confidence-level-prediction-api:latest
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: production
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      MODEL_ARTIFACT_PATH: app/artifacts/model.joblib
+      DATA_PATH: confidence_features.csv
+      TRAIN_IF_MISSING: "true"
