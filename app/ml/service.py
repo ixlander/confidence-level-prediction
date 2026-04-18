@@ -22,6 +22,7 @@ class ModelService:
     def __init__(self) -> None:
         self._bundle = None
         self._lock = Lock()
+        self._feature_columns = FEATURE_SPEC.numeric_features + FEATURE_SPEC.categorical_features
 
     @property
     def is_loaded(self) -> bool:
@@ -41,7 +42,7 @@ class ModelService:
         if self._bundle is None:
             raise RuntimeError("Model not loaded")
 
-        frame = pd.DataFrame([payload], columns=FEATURE_SPEC.numeric_features + FEATURE_SPEC.categorical_features)
+        frame = pd.DataFrame([payload], columns=self._feature_columns)
         pipeline = self._bundle["pipeline"]
         pred_label = str(pipeline.predict(frame)[0])
 
@@ -52,7 +53,23 @@ class ModelService:
         return PredictionResult(label=pred_label, probabilities=probabilities)
 
     def predict_batch(self, payloads: list[dict]) -> list[PredictionResult]:
-        return [self.predict_one(payload) for payload in payloads]
+        if self._bundle is None:
+            raise RuntimeError("Model not loaded")
+
+        frame = pd.DataFrame(payloads, columns=self._feature_columns)
+        pipeline = self._bundle["pipeline"]
+
+        labels = [str(label) for label in pipeline.predict(frame)]
+        all_probabilities = pipeline.predict_proba(frame)
+        classes = [str(c) for c in pipeline.classes_]
+
+        return [
+            PredictionResult(
+                label=label,
+                probabilities={class_label: float(prob) for class_label, prob in zip(classes, probabilities)},
+            )
+            for label, probabilities in zip(labels, all_probabilities)
+        ]
 
 
 model_service = ModelService()
