@@ -36,6 +36,7 @@ ENGINEERED_FEATURES = [
     "eye_ratio_adjusted",
     "body_tension",
 ]
+EPSILON = 1e-6
 
 
 @dataclass(frozen=True)
@@ -61,8 +62,8 @@ class AddFeatures(BaseEstimator, TransformerMixin):
     def transform(self, X: pd.DataFrame):
         X = X.copy()
         X["posture_stability"] = X["spine_angle"] + X["head_tilt_angle"]
-        X["lean_ratio"] = X["body_lean_x"] / (X["shoulder_span"] + 1e-6)
-        X["eye_ratio_adjusted"] = X["eye_distance"] / (X["eye_shoulder_y_ratio"] + 1e-6)
+        X["lean_ratio"] = X["body_lean_x"] / (X["shoulder_span"] + EPSILON)
+        X["eye_ratio_adjusted"] = X["eye_distance"] / (X["eye_shoulder_y_ratio"] + EPSILON)
         X["body_tension"] = X["spine_angle"].abs() + X["shoulder_slope"].abs()
         return X
 

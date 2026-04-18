@@ -59,7 +59,7 @@ python -m app.ml.training --data-path confidence_features.csv --artifact-path ap
 4. Start API:
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
 ```
 
 ## Docker run
